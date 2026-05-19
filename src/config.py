@@ -50,21 +50,7 @@ TIPOS_DOCUMENTO = {
 MONGO_URI = "mongodb+srv://larissa:engbigdata%40@cluster-bi-data.fzpirih.mongodb.net/?appName=cluster-bi-data"
 MONGO_DB  = "pncp"
 
-# colunas a preservar apos transformacao Spark
-CAMPOS_RELEVANTES = [
-    "numeroControlePNCP",
-    "cnpj_orgao",
-    "razao_social",
-    "municipio_nome",
-    "uf",
-    "dataPublicacaoPncp",
-    "objetoCompra",
-    "modalidade_id",
-    "modalidade_nome",
-    "categoria_id",
-    "categoria_nome",
-    "situacao_id",
-    "situacao_nome",
-    "valorTotalEstimado",
-    "ano_compra",
-]
+COLECAO_RAW = "contratacoes_raw"
+
+# saida CSV da camada silver
+OUTPUT_DIR = "data/silver"

@@ -45,4 +45,4 @@ try {
     subst "$LetraTemp" /D | Out-Null
 }
 
-Write-Host "Pronto! Veja os resultados em data/processed/ e no MongoDB Atlas." -ForegroundColor Green
+Write-Host "Pronto! CSV salvo em data/silver/ e dados brutos no MongoDB Atlas." -ForegroundColor Green

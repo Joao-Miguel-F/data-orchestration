@@ -1,10 +1,48 @@
 import os
 import json
+from pathlib import Path
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql.types import DoubleType
 
+def _short_path(path: str) -> str:
+    """Converte caminho Windows para formato 8.3 (sem acentos/espacos)."""
+    import ctypes
+    buf_size = ctypes.windll.kernel32.GetShortPathNameW(path, None, 0)
+    if buf_size == 0:
+        return path
+    buf = ctypes.create_unicode_buffer(buf_size)
+    ctypes.windll.kernel32.GetShortPathNameW(path, buf, buf_size)
+    return buf.value
+
+
 def create_spark_session(app_name: str = "PNCP-Pipeline") -> SparkSession:
+    import sys
+    spark_tmp = "C:/tmp/spark"
+    os.makedirs(spark_tmp, exist_ok=True)
+
+    # Converte caminhos com acentos para formato curto do Windows (8.3)
+    python_short = _short_path(sys.executable)
+    os.environ["PYSPARK_PYTHON"] = python_short
+    os.environ["PYSPARK_DRIVER_PYTHON"] = python_short
+
+    import pyspark
+    spark_home = _short_path(str(Path(pyspark.__file__).parent))
+    os.environ["SPARK_HOME"] = spark_home
+
+    # Define JAVA_HOME automaticamente se nao estiver definido
+    if not os.environ.get("JAVA_HOME"):
+        import subprocess
+        result = subprocess.run(["where", "java"], capture_output=True, text=True)
+        if result.returncode == 0:
+            java_exe = result.stdout.strip().splitlines()[0]
+            os.environ["JAVA_HOME"] = _short_path(str(Path(java_exe).parent.parent))
+
+    # winutils.exe e obrigatorio para PySpark no Windows
+    if not os.environ.get("HADOOP_HOME"):
+        os.environ["HADOOP_HOME"] = "C:/hadoop"
+        os.environ["PATH"] = "C:/hadoop/bin;" + os.environ.get("PATH", "")
+
     spark = (
         SparkSession.builder
         .appName(app_name)
@@ -12,6 +50,7 @@ def create_spark_session(app_name: str = "PNCP-Pipeline") -> SparkSession:
         .config("spark.sql.shuffle.partitions", "4")
         .config("spark.driver.memory", "2g")
         .config("spark.sql.debug.maxToStringFields", "50")
+        .config("spark.local.dir", spark_tmp)
         .getOrCreate()
     )
     spark.sparkContext.setLogLevel("ERROR")
@@ -83,30 +122,11 @@ def add_data_coleta(df: DataFrame) -> DataFrame:
     return df.withColumn("data_coleta", F.current_timestamp())
 
 
-def show_summary(df: DataFrame) -> None:
-    total = df.count()
-    print(f"\n=== Resumo do DataFrame ===")
-    print(f"Total de registros: {total}")
+def save_as_csv(df: DataFrame, path: str) -> None:
+    import os
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    df.toPandas().to_csv(path, index=False, encoding="utf-8")
+    print(f"CSV salvo em: {path}")
 
-    print("\n-- Distribuicao por ramo do MEI --")
-    df.groupBy("ramo_mei").count().orderBy(F.desc("count")).show(truncate=False)
-
-    print("-- Distribuicao por modalidade --")
-    df.groupBy("modalidade_nome").count().orderBy(F.desc("count")).show(truncate=False)
-
-    print("-- Top 5 orgaos por numero de contratacoes --")
-    df.groupBy("razao_social").count().orderBy(F.desc("count")).limit(5).show(truncate=False)
-
-    print("-- Valor total estimado por ramo --")
-    linhas = (
-        df.groupBy("ramo_mei")
-        .agg(F.sum("valorTotalEstimado").alias("total"))
-        .orderBy(F.desc("total"))
-        .collect()
-    )
-    for row in linhas:
-        valor = row["total"] or 0
-        valor_fmt = f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        print(f"  {row['ramo_mei']:<12} {valor_fmt}")
 
 

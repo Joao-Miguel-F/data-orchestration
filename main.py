@@ -45,9 +45,10 @@ def parse_args() -> argparse.Namespace:
         help="Registros por pagina da API (padrao: 20, max: 500)",
     )
     parser.add_argument(
-        "--sem-resumo",
-        action="store_true",
-        help="Suprime o resumo estatistico no console",
+        "--max-paginas",
+        type=int,
+        default=None,
+        help="Limita o numero de paginas coletadas (util para testes)",
     )
     return parser.parse_args()
 
@@ -60,5 +61,5 @@ if __name__ == "__main__":
         modalidade=args.modalidade,
         uf=args.uf,
         tamanho_pagina=args.tamanho_pagina,
-        exibir_resumo=not args.sem_resumo,
+        max_paginas=args.max_paginas,
     )

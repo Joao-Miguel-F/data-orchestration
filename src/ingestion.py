@@ -47,6 +47,7 @@ def fetch_all_pages(
     uf: str = DEFAULT_PARAMS["uf"],
     tamanho: int = DEFAULT_PARAMS["tamanhoPagina"],
     delay_segundos: float = 1.5,
+    max_paginas: int | None = None,
 ) -> list[dict]:
     """
     Percorre todas as paginas da API e retorna lista com todos os registros.
@@ -63,7 +64,9 @@ def fetch_all_pages(
 
     total_paginas = primeira_pagina.get("totalPaginas", 1)
     total_registros = primeira_pagina.get("totalRegistros", 0)
-    print(f"Total de registros: {total_registros} | Total de paginas: {total_paginas}")
+    if max_paginas:
+        total_paginas = min(total_paginas, max_paginas)
+    print(f"Total de registros: {total_registros} | Paginas a coletar: {total_paginas}")
 
     todos_registros = primeira_pagina.get("data", [])
 
