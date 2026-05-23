@@ -18,9 +18,6 @@ venv/
 # Logs
 logs/
 
-# Prefect
-.prefect/
-
 # IDEs
 .vscode/
 .idea/
