@@ -3,3 +3,6 @@ pymongo[srv]>=4.7
 certifi
 requests>=2.31.0
 pandas>=2.0.0
+mcp>=1.0.0
+streamlit>=1.35.0
+ollama>=0.3.0
