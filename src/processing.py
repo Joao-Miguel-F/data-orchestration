@@ -84,11 +84,13 @@ def _add_faixa_valor(df: DataFrame) -> DataFrame:
     )
 
 
-def agregar_por_area(df: DataFrame, periodo: str) -> list[dict]:
+def agregar_por_area(df: DataFrame, periodo_inicio: str, periodo_fim: str) -> list[dict]:
     ts = datetime.now(timezone.utc).isoformat()
+
     return [
         {
-            "periodo": periodo,
+            "periodo_inicio": periodo_inicio,
+            "periodo_fim": periodo_fim,
             "uf": row["uf"],
             "ramo_mei": row["ramo_mei"],
             "total_contratacoes": row["total_contratacoes"],
@@ -109,11 +111,13 @@ def agregar_por_area(df: DataFrame, periodo: str) -> list[dict]:
     ]
 
 
-def agregar_por_estado(df: DataFrame, periodo: str) -> list[dict]:
+def agregar_por_estado(df: DataFrame, periodo_inicio: str, periodo_fim: str) -> list[dict]:
     ts = datetime.now(timezone.utc).isoformat()
+
     return [
         {
-            "periodo": periodo,
+            "periodo_inicio": periodo_inicio,
+            "periodo_fim": periodo_fim,
             "uf": row["uf"],
             "total_contratacoes": row["total_contratacoes"],
             "valor_total": float(row["valor_total"] or 0),
@@ -133,11 +137,13 @@ def agregar_por_estado(df: DataFrame, periodo: str) -> list[dict]:
     ]
 
 
-def agregar_por_faixa(df: DataFrame, periodo: str) -> list[dict]:
+def agregar_por_faixa(df: DataFrame, periodo_inicio: str, periodo_fim: str) -> list[dict]:
     ts = datetime.now(timezone.utc).isoformat()
+
     return [
         {
-            "periodo": periodo,
+            "periodo_inicio": periodo_inicio,
+            "periodo_fim": periodo_fim,
             "uf": row["uf"],
             "faixa_valor": row["faixa_valor"],
             "total_contratacoes": row["total_contratacoes"],
@@ -157,11 +163,13 @@ def agregar_por_faixa(df: DataFrame, periodo: str) -> list[dict]:
     ]
 
 
-def agregar_por_situacao(df: DataFrame, periodo: str) -> list[dict]:
+def agregar_por_situacao(df: DataFrame, periodo_inicio: str, periodo_fim: str) -> list[dict]:
     ts = datetime.now(timezone.utc).isoformat()
+
     return [
         {
-            "periodo": periodo,
+            "periodo_inicio": periodo_inicio,
+            "periodo_fim": periodo_fim,
             "uf": row["uf"],
             "situacao_nome": row["situacao_nome"],
             "total_contratacoes": row["total_contratacoes"],
@@ -207,16 +215,45 @@ def agregar_por_mes(df: DataFrame) -> list[dict]:
     ]
 
 
-def build_gold(spark: SparkSession, registros: list[dict], periodo: str) -> dict[str, list[dict]]:
+def build_gold(
+    spark: SparkSession,
+    registros: list[dict],
+    periodo: str,
+) -> dict[str, list[dict]]:
+
+    periodo_inicio, periodo_fim = periodo.split("_")
+
     df = load_from_records(spark, registros)
     df.cache()
+
     try:
         return {
-            "gold_area_de_servico": agregar_por_area(df, periodo),
-            "gold_estado":          agregar_por_estado(df, periodo),
-            "gold_faixa_de_valor":  agregar_por_faixa(df, periodo),
-            "gold_situacao":        agregar_por_situacao(df, periodo),
-            "gold_por_mes":         agregar_por_mes(df),
+            "gold_area_de_servico": agregar_por_area(
+                df,
+                periodo_inicio,
+                periodo_fim,
+            ),
+
+            "gold_estado": agregar_por_estado(
+                df,
+                periodo_inicio,
+                periodo_fim,
+            ),
+
+            "gold_faixa_de_valor": agregar_por_faixa(
+                df,
+                periodo_inicio,
+                periodo_fim,
+            ),
+
+            "gold_situacao": agregar_por_situacao(
+                df,
+                periodo_inicio,
+                periodo_fim,
+            ),
+
+            "gold_por_mes": agregar_por_mes(df),
         }
+
     finally:
         df.unpersist()

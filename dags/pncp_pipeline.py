@@ -36,6 +36,7 @@ def transform_silver(data_interval_start, data_interval_end, **kwargs):
         return
 
     spark = create_spark_session()
+
     result = (
         load_from_records(spark, registros)
         .transform(flatten_and_select)
@@ -43,8 +44,12 @@ def transform_silver(data_interval_start, data_interval_end, **kwargs):
         .transform(deduplicate)
         .transform(add_data_coleta)
     )
+
     inserir_processados(result.toPandas().to_dict(orient="records"))
-    print(f"Silver: {contar('contratacoes_processadas')} documentos totais.")
+
+    print(
+        f"Silver: {contar('contratacoes_processadas')} documentos totais."
+    )
 
 
 def build_gold(data_interval_start, data_interval_end, **kwargs):
@@ -53,25 +58,60 @@ def build_gold(data_interval_start, data_interval_end, **kwargs):
 
     di = data_interval_start.strftime("%Y%m%d")
     data_final = data_interval_end.strftime("%Y%m%d")
+
     periodo = f"{di}_{data_final}"
 
     registros = buscar_processados_por_periodo(di, data_final)
+
     if not registros:
         print("Nenhum registro na Silver para o período.")
         return
 
     spark = create_spark_session()
-    agregacoes = build_gold(spark, registros, periodo)
+
+    agregacoes = build_gold(
+        spark,
+        registros,
+        periodo,
+    )
 
     chaves = {
-        "gold_area_de_servico": ["periodo", "uf", "ramo_mei"],
-        "gold_estado":          ["periodo", "uf"],
-        "gold_faixa_de_valor":  ["periodo", "uf", "faixa_valor"],
-        "gold_situacao":        ["periodo", "uf", "situacao_nome"],
-        "gold_por_mes":         ["uf", "ano", "mes"],
+        "gold_area_de_servico": [
+            "periodo_inicio",
+            "periodo_fim",
+            "uf",
+            "ramo_mei",
+        ],
+        "gold_estado": [
+            "periodo_inicio",
+            "periodo_fim",
+            "uf",
+        ],
+        "gold_faixa_de_valor": [
+            "periodo_inicio",
+            "periodo_fim",
+            "uf",
+            "faixa_valor",
+        ],
+        "gold_situacao": [
+            "periodo_inicio",
+            "periodo_fim",
+            "uf",
+            "situacao_nome",
+        ],
+        "gold_por_mes": [
+            "uf",
+            "ano",
+            "mes",
+        ],
     }
+
     for colecao, registros_gold in agregacoes.items():
-        salvar_gold(colecao, registros_gold, chaves[colecao])
+        salvar_gold(
+            colecao,
+            registros_gold,
+            chaves[colecao],
+        )
 
 
 with DAG(

@@ -1,0 +1,18 @@
+scheduler-1  | 
+scheduler-1  |   ____________       _____________
+scheduler-1  |  ____    |__( )_________  __/__  /________      __
+scheduler-1  | ____  /| |_  /__  ___/_  /_ __  /_  __ \_ | /| / /
+scheduler-1  | ___  ___ |  / _  /   _  __/ _  / / /_/ /_ |/ |/ /
+scheduler-1  |  _/_/  |_/_/  /_/    /_/    /_/  \____/____/|__/
+scheduler-1  | [[34m2026-05-30T03:33:40.802+0000[0m] {[34mtask_context_logger.py:[0m63} INFO[0m - Task context logging is enabled[0m
+scheduler-1  | [[34m2026-05-30T03:33:40.802+0000[0m] {[34mexecutor_loader.py:[0m235} INFO[0m - Loaded executor: LocalExecutor[0m
+scheduler-1  | [[34m2026-05-30T03:33:40.946+0000[0m] {[34mscheduler_job_runner.py:[0m796} INFO[0m - Starting the scheduler[0m
+scheduler-1  | [[34m2026-05-30T03:33:40.948+0000[0m] {[34mscheduler_job_runner.py:[0m803} INFO[0m - Processing each file at most -1 times[0m
+scheduler-1  | [2026-05-30 03:33:40 +0000] [31] [INFO] Starting gunicorn 22.0.0
+scheduler-1  | [2026-05-30 03:33:40 +0000] [31] [INFO] Listening at: http://[::]:8793 (31)
+scheduler-1  | [2026-05-30 03:33:40 +0000] [31] [INFO] Using worker: sync
+scheduler-1  | [2026-05-30 03:33:40 +0000] [32] [INFO] Booting worker with pid: 32
+scheduler-1  | [2026-05-30 03:33:41 +0000] [41] [INFO] Booting worker with pid: 41
+scheduler-1  | [[34m2026-05-30T03:33:41.363+0000[0m] {[34mmanager.py:[0m170} INFO[0m - Launched DagFileProcessorManager with pid: 168[0m
+scheduler-1  | [[34m2026-05-30T03:33:41.367+0000[0m] {[34mscheduler_job_runner.py:[0m1595} INFO[0m - Adopting or resetting orphaned tasks for active dag runs[0m
+scheduler-1  | [[34m2026-05-30T03:33:41.377+0000[0m] {[34msettings.py:[0m60} INFO[0m - Configured default timezone UTC[0m
