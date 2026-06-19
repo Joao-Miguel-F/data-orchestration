@@ -7,5 +7,5 @@ DEFAULT_PARAMS = {
     "tamanhoPagina": 20,
 }
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://larissa:engbigdata%40@cluster-bi-data.fzpirih.mongodb.net/?appName=cluster-bi-data")
+MONGO_URI = os.getenv("MONGO_URI", "COLOQUE AQUI SUA URI")
 MONGO_DB  = os.getenv("MONGO_DB", "pncp")
